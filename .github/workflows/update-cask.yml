@@ -1,0 +1,47 @@
+# The cask follows a release of Plumo. Given a version, this downloads the DMG
+# from plumo-releases, computes its checksum, rewrites Casks/plumo.rb and
+# commits — with the repository's own token, so no personal token has to
+# reach this repo. Triggered by the release pipeline, or by hand with a version.
+name: Update cask
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Plumo version, e.g. 1.3.0"
+        required: true
+  repository_dispatch:
+    types: [plumo-release]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch the release and rewrite the cask
+        env:
+          VERSION: ${{ github.event.inputs.version || github.event.client_payload.version }}
+        run: |
+          set -euo pipefail
+          [ -n "$VERSION" ] || { echo "::error::No version given"; exit 1; }
+          URL="https://github.com/zielaq/plumo-releases/releases/download/v${VERSION}/Plumo-${VERSION}.dmg"
+          curl -fsSL -o Plumo.dmg "$URL"
+          SHA=$(sha256sum Plumo.dmg | awk '{print $1}')
+          rm Plumo.dmg
+          sed -i -e "s/^  version \".*\"/  version \"${VERSION}\"/" \
+                 -e "s/^  sha256 \".*\"/  sha256 \"${SHA}\"/" Casks/plumo.rb
+          grep -q "version \"${VERSION}\"" Casks/plumo.rb && grep -q "sha256 \"${SHA}\"" Casks/plumo.rb
+          echo "→ Plumo ${VERSION}, sha256 ${SHA}"
+
+      - name: Commit and push
+        run: |
+          git config user.name "plumo-release"
+          git config user.email "release@getplumo.app"
+          if git diff --quiet; then echo "Cask already current"; exit 0; fi
+          git add Casks/plumo.rb
+          git commit -m "Plumo ${{ github.event.inputs.version || github.event.client_payload.version }}"
+          git push
