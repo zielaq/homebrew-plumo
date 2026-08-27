@@ -2,14 +2,13 @@ cask "plumo" do
   version "1.2.0"
   sha256 "bafcb1e901f0b696417e4c938da6f434ade4181089e4518c820e133c804c95c8"
 
-  url "https://github.com/zielaq/plumo-releases/releases/download/v#{version}/Plumo-#{version}.dmg",
-      verified: "github.com/zielaq/plumo-releases/"
+  url "https://getplumo.app/download/Plumo-#{version}.dmg"
   name "Plumo"
   desc "Fix and translate selected text in any app with a double Cmd-C"
   homepage "https://getplumo.app/"
 
   livecheck do
-    url :url
+    url "https://github.com/zielaq/plumo-releases/releases/latest"
     strategy :github_latest
   end
 
