@@ -1,6 +1,6 @@
 cask "plumo" do
-  version "1.5.0"
-  sha256 "0a60441d956027648c44b0a611f2d53996947e4f1134cd5173898384480099d5"
+  version "1.5.1"
+  sha256 "dbd5f5a5ebe815860c66a501e263f2d89f19fe3a7abefab0e604a09e7d1072e2"
 
   url "https://getplumo.app/download/Plumo-#{version}.dmg"
   name "Plumo"
